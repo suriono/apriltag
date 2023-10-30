@@ -37,6 +37,7 @@ class Detector:
          radian, degree = self.get_Euler(result.pose_R)
          #print("R matrix: ", result.pose_t)
          X,Y,Z = result.pose_t*1000.0
+         self.X, self.Y, self.Z = X[0],Y[0],Z[0]
          position = (X[0],Y[0],Z[0])
          self.Pitch.append(degree[0])
          self.Yaw.append(degree[1])
@@ -57,24 +58,16 @@ class Detector:
 #         self.draw_Bounding_box(result)
          self.draw_Cube(1, self.pose)
          np_pose = np.array(self.pose)
-#         np_pose[0][3] *= self.tag_size
-#         np_pose[1][3] *= self.tag_size
-#         np_pose[2][3] *= self.tag_size
-#         self.pose[0][3] *= self.tag_size
-#         self.pose[1][3] += 0.5
-#         self.pose[2][3] *= self.tag_size
          # Find where the camera is if the tag is at the origin
          camera_pose = np.linalg.inv(self.pose) # relative to the ta
       #   camera_pose = invert(self.pose) # relative to the ta
-#         unitmat = np.matmul(self.pose,camera_pose)
          camera_pose[0][3] *= self.tag_size * 1000
          camera_pose[1][3] *= self.tag_size * 1000
          camera_pose[2][3] *= self.tag_size * 1000
-#         print("relative camera pose: ", camera_pose)
-         X_cam,Y_cam,Z_cam = self.pose[0][3]*1000, self.pose[1][3]*1000, self.pose[2][3]*1000
-         print("Relative XYZ: ", X_cam,Y_cam,Z_cam)
-         print("Relative Camera:\n", camera_pose)
-#         print("Unity Matrix:\n", unitmat)
+         self.camera_X = camera_pose[0][3]
+         self.camera_Y = camera_pose[1][3] 
+         self.camera_Z = camera_pose[2][3] 
+#         print("Relative to Camera:\n", camera_pose)
 
    # --------------------------------------------------------
    def get_Euler(self, Rmatrix):
@@ -84,15 +77,16 @@ class Detector:
       return radian, degree
 
    # --------------------------------------------------------
-   def annotage_Image(self):
-      text_translation = '(X,Y,Z) in mm:' + f'({self.Translation[0][0]:.0f}' + ',' + f'{self.Translation[0][1]:.0f}' + ',' + f'{self.Translation[0][2]:.0f})' 
+   def annotate_Image(self,X,Y,Z):
+      # text_translation = '(X,Y,Z) in mm:' + f'({self.Translation[0][0]:.0f}' + ',' + f'{self.Translation[0][1]:.0f}' + ',' + f'{self.Translation[0][2]:.0f})' 
+      text_translation = '(X,Y,Z) in mm:' + f'({X:.0f}' + ',' + f'{Y:.0f}' + ',' + f'{Z:.0f})' 
       location_translation = (10,30)
 
       text_rotation = '(Yaw,Pitch,Roll):' + f'({self.Yaw[0]:.1f}' + ',' + f'{self.Pitch[0]:.1f}' + ',' + f'{self.Roll[0]:.1f})' 
       location_rotation = (10,80)
 
       font,location,fontScale = cv2.FONT_HERSHEY_SIMPLEX,(10, 30),1 
-      color,thickness = (55, 0, 255),4 
+      color,thickness = (255, 0, 0),4 
       annote_img = cv2.putText(self.img, text_translation, 
                    location_translation, font, fontScale, color, 
                    thickness, cv2.LINE_AA)
@@ -153,8 +147,10 @@ class Detector:
          cv2.line(self.img, ipoints[i], ipoints[j], (0, 0, 255), 3, 16)
 
    # --------------------------------------------------------
-   def showImage(self, image, length):
-      cv2.imshow('img', image)
+   def showImage(self, image, length, scale=1):
+      resize_picture = cv2.resize(image,(image.shape[1]*scale, image.shape[0]*scale))
+      #cv2.imshow('img', image)
+      cv2.imshow('img', resize_picture)
       keypress = cv2.waitKey(length)
       return keypress
 
