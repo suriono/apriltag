@@ -22,8 +22,12 @@ def Run_eachPressKey(tagfinder_obj, draw_obj):
    tag_id     = tagfinder_obj.tag_id
    transform_t = np.array(tag_transform[tag_family][str(tag_id)]['tmatrix'])
 
+   # tag from camera
    X,Y,Z = tagfinder_obj.X,tagfinder_obj.Y,tagfinder_obj.Z
    yaw,pitch,roll = tagfinder_obj.Yaw[0],tagfinder_obj.Pitch[0],tagfinder_obj.Roll[0]
+
+   # camera from tag
+   tagfinder_obj.getCamera_Pose()
    cam_X,cam_Y,cam_Z = tagfinder_obj.camera_X,tagfinder_obj.camera_Y,tagfinder_obj.camera_Z
    cam_position = np.array([ cam_X, cam_Y, cam_Z ])
 
@@ -33,6 +37,7 @@ def Run_eachPressKey(tagfinder_obj, draw_obj):
    draw_obj.img = tagfinder_obj.img
    draw_obj.annotate_Image(10,30,X,Y,Z,yaw,pitch,roll,(250,0,120))
    draw_obj.annotate_Image(10,140,cam_X,cam_Y,cam_Z,yaw,pitch,roll,(0,255,0))
+   draw_obj.draw_Cube()
 
    #X,Y,Z = translate[0][0],translate[1][0], translate[2][0]
    #print(" ==== Translation: (", X,",",Y,",",Z,")")
@@ -47,7 +52,7 @@ def Run_eachPressKey(tagfinder_obj, draw_obj):
 
 
 tagfinder_obj = tag_finder.Detector(0.047)
-draw_obj      = drawing.Draw()
+draw_obj      = drawing.Draw(tagfinder_obj)
 
 keypress = ord('*') # arbitrary
 

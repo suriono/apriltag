@@ -19,9 +19,12 @@ class Camera:
       # manual correction 
       print("MTX: \n", mtx, fx, fy,cx,cy)
       #fx,fy,cx,cy = 676.619, 676.835, 385.113, 201.814
-#     fx,fy,cx,cy = 1120, 1120, 385.113, 201.814
+#      fx,fy,cx,cy = 1120, 1120, 385.113, 201.814
+      #fx,fy,cx,cy = 676, 676, 385.113, 201.814
+#      fx,fy,cx,cy = 676, 676, 385.113, 201.814
       fy,cx,cy = fx, 320, 240
-      #fx = fy
+#      fy,cx,cy = fx, 640, 480
+#      fy = fx
 
       self.distortion = dist[0]
       self.camera_params = (fx,fy,cx,cy)

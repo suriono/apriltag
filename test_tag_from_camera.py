@@ -15,6 +15,8 @@ def Run_eachPressKey(tagfinder_obj):
 
    draw_obj.img = tagfinder_obj.img
    draw_obj.annotate_Image(10,30,X,Y,Z,yaw,pitch,roll)
+   #draw_obj.draw_Bounding_box()
+   draw_obj.draw_Cube()
 
 #   tagfinder_obj.annotate_Image()
 #   translate = tagfinder_obj.dt_results[0].pose_t
@@ -36,11 +38,12 @@ def Run_eachPressKey(tagfinder_obj):
 # ============================================
 
 tagfinder_obj = tag_finder.Detector(0.047)
-draw_obj      = drawing.Draw()
+draw_obj      = drawing.Draw(tagfinder_obj)
 
 keypress = ord('*') # arbitrary
 
 while keypress != ord('a'):
    keypress = Run_eachPressKey(tagfinder_obj)
+
 tagfinder_obj.release_Camera()
 tagfinder_obj.destroyAllWindows()
