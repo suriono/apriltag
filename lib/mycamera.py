@@ -7,7 +7,7 @@ import glob
 class Camera:
 
    def __init__(self):
-      with np.load('camera_calibration/calibration_savez.npz') as X:
+      with np.load('../camera_calibration/calibration_savez.npz') as X:
          mtx, dist, self.rvecs, self.tvecs = [X[i] for i in ('mtx','dist','rvecs','tvecs')]
       self.capture = cv2.VideoCapture(0)
 
@@ -16,15 +16,11 @@ class Camera:
       cx   = mtx[0,2]
       cy   = mtx[1,2]
 
-      # manual correction 
-      print("MTX: \n", mtx, fx, fy,cx,cy)
-      #fx,fy,cx,cy = 676.619, 676.835, 385.113, 201.814
-#      fx,fy,cx,cy = 1120, 1120, 385.113, 201.814
-      #fx,fy,cx,cy = 676, 676, 385.113, 201.814
-#      fx,fy,cx,cy = 676, 676, 385.113, 201.814
-      fy,cx,cy = fx, 320, 240
-#      fy,cx,cy = fx, 640, 480
-#      fy = fx
+      # manual correction , not a large adjustments
+      print("Original MTX: \n", mtx,"\n", fx, fy,cx,cy)
+      #fx,fy,cx,cy = fx*0.8, fy*0.8, 294,222
+      fx,fy,cx,cy = fy*0.8, fy*0.8, 294,193
+#      fx,fy,cx,cy = fx, fy, 340, 180
 
       self.distortion = dist[0]
       self.camera_params = (fx,fy,cx,cy)

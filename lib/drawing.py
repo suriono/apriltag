@@ -27,10 +27,10 @@ class Draw:
       return annote_img
 
    # --------------------------------------------------------
-   def get_Destination(self, loc):
+   def get_Destination(self, loc,X,Y):
       print("Destination: ", loc)
-      dx = loc[0] - self.Translation[0][0]
-      dy = loc[1] - self.Translation[0][1]
+      dx = loc[0] - X 
+      dy = loc[1] - Y
       radian = math.atan2(dx,dy)
       self.draw_Arrow(radian)
 

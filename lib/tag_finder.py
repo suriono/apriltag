@@ -1,11 +1,11 @@
-import mycamera, apriltag, cv2, math
+import mycamera, apriltag, cv2, math, json
 import numpy as np
 import dt_apriltags
 from transforms3d.euler import mat2euler
 
 # ======================== Camera class==================================
 class Detector:
-   def __init__(self, tag_size):
+   def __init__(self, tag_size, transform_file='tag_transform.json'):
       self.tag_size = tag_size
       self.camera_obj = mycamera.Camera()
       options = apriltag.DetectorOptions(families="tag36h11") 
@@ -14,6 +14,9 @@ class Detector:
       if self.camera_obj.start_reader():
          self.img = self.camera_obj.image
          self.camera_width,self.camera_height = self.img.shape[1],self.img.shape[0]
+      f = open(transform_file)
+      self.tag_transform = json.load(f)
+      f.close()
 
    # --------------------------------------------------------
    def capture_Camera(self):
@@ -33,21 +36,37 @@ class Detector:
       self.dt_results = self.dt_detector.detect(self.gray,True,self.camera_obj.camera_params, self.tag_size)
 
       self.Yaw, self.Pitch, self.Roll,self.Translation = [],[],[],[]
+      self.Poses = []
+
       for result in self.dt_results:
+         pose = {}
          radian, degree = self.get_Euler(result.pose_R)
          #print("R matrix: ", result.pose_t)
          X,Y,Z = result.pose_t*1000.0
-         self.X, self.Y, self.Z = X[0],Y[0],Z[0]
-         position = (X[0],Y[0],Z[0])
-         self.Pitch.append(degree[0])
-         self.Yaw.append(degree[1])
-         self.Roll.append(degree[2])
-         self.Translation.append(position)
-         self.tag_family = result.tag_family.decode("utf-8")
-         self.tag_id = result.tag_id
-         print("TAG FAMILY: ", self.tag_family, " tag id: ", self.tag_id)
+         # Z is calibrated
+         position = (X[0],Y[0],Z[0]*0.94)
+
+         pose['translation'] = position
+         pose['degree']      = degree
+         pose['radian']      = radian
+         pose['tag_family'] = result.tag_family.decode("utf-8")
+         pose['tag_id']     = result.tag_id
+
+         motorX = X[0] - Z[0]*math.sin(radian[1])
+         motorY = Y[0] + Z[0]*math.sin(radian[0])
+         motorZ = Z[0]*math.cos(radian[1]) - X[0]*math.sin(radian[1])
+         pose['motor_translation'] = [motorX, motorY, motorZ]
+
+         # transform matrix is Ax + B
+         Amatrix = self.tag_transform[pose['tag_family']][str(pose['tag_id'])]['Amatrix']
+#         print(pose['motor_translation'])
+         pose['transform'] = np.dot(Amatrix,pose['motor_translation'])
+         print(pose['transform'])
+ 
+         self.Poses.append(pose)
 
 #      self.getCamera_Pose(self.gray)
+#      print("Pose: ", self.Poses)
       return (len(self.dt_results)>0)
 
    # --------------------------------------------------------
@@ -82,18 +101,13 @@ class Detector:
       return self.tag_family, self.tag_id, X,Y,Z, yaw,pitch,roll
 
    # --------------------------------------------------------
-   def get_Destination(self, loc):
-#      print("Destination: ", loc)
-      dx = loc[0] - self.Translation[0][0]
-      dy = loc[1] - self.Translation[0][1]
-      radian = math.atan2(dx,dy)
-#      self.draw_Arrow(radian)
-
-   # --------------------------------------------------------
    def showImage(self, image, length, scale=1):
-      resize_picture = cv2.resize(image,(image.shape[1]*scale, image.shape[0]*scale))
-      #cv2.imshow('img', image)
-      cv2.imshow('img', resize_picture)
+      try:
+         resize_picture = cv2.resize(image,(image.shape[1]*scale, image.shape[0]*scale))
+         #cv2.imshow('img', image)
+         cv2.imshow('img', resize_picture)
+      except:
+         pass
       keypress = cv2.waitKey(length)
       return keypress
 
