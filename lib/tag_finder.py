@@ -70,22 +70,20 @@ class Detector:
       return (len(self.dt_results)>0)
 
    # --------------------------------------------------------
-   def getCamera_Pose(self):
-      results = self.detector.detect(self.gray)
-      for result in results:
-         self.pose, e0, e1 = self.detector.detection_pose(result, self.camera_obj.camera_params)
-#         self.draw_Cube(1)
-         np_pose = np.array(self.pose)
+   def getCamera_Pose(self, result):
+      self.pose, e0, e1 = self.detector.detection_pose(result, self.camera_obj.camera_params)
+#     self.draw_Cube(1)
+      np_pose = np.array(self.pose)
          # Find where the camera is if the tag is at the origin
-         camera_pose = np.linalg.inv(self.pose) # relative to the ta
-      #   camera_pose = invert(self.pose) # relative to the ta
-         camera_pose[0][3] *= self.tag_size * 1000
-         camera_pose[1][3] *= self.tag_size * 1000
-         camera_pose[2][3] *= self.tag_size * 1000
-         self.camera_X = camera_pose[0][3]
-         self.camera_Y = camera_pose[1][3] 
-         self.camera_Z = camera_pose[2][3] 
-#         print("Relative to Camera:\n", camera_pose)
+      camera_pose = np.linalg.inv(self.pose) # relative to the ta
+  #   camera_pose = invert(self.pose) # relative to the ta
+      camera_pose[0][3] *= self.tag_size * 1000
+      camera_pose[1][3] *= self.tag_size * 1000
+      camera_pose[2][3] *= self.tag_size * 1000
+      self.camera_X = camera_pose[0][3]
+      self.camera_Y = camera_pose[1][3] 
+      self.camera_Z = camera_pose[2][3] 
+#     print("Relative to Camera:\n", camera_pose)
 
    # --------------------------------------------------------
    def get_Euler(self, Rmatrix):

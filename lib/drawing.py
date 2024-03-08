@@ -13,7 +13,6 @@ class Draw:
       text_translation = '(X,Y,Z) in mm:' + f'({X:.0f}' + ',' + f'{Y:.0f}' + ',' + f'{Z:.0f})' 
       location_translation = (loc_x,loc_y)
 
-      text_rotation = '(Yaw,Pitch,Roll):' + f'({yaw:.1f}' + ',' + f'{pitch:.1f}' + ',' + f'{roll:.1f})' 
       location_rotation = (loc_x,loc_y+50)
 
       font,location,fontScale = cv2.FONT_HERSHEY_SIMPLEX,(10, 30),1 
@@ -22,7 +21,10 @@ class Draw:
       annote_img = cv2.putText(self.tagobj.img, text_translation, 
                    location_translation, font, fontScale, color, 
                    thickness, cv2.LINE_AA)
-      annote_img = cv2.putText(self.tagobj.img, text_rotation, location_rotation,
+
+      if abs(yaw+pitch+roll) > 0 :
+         text_rotation = '(Yaw,Pitch,Roll):' + f'({yaw:.1f}' + ',' + f'{pitch:.1f}' + ',' + f'{roll:.1f})' 
+         annote_img = cv2.putText(self.tagobj.img, text_rotation, location_rotation,
                    font, fontScale, color, thickness, cv2.LINE_AA)
       return annote_img
 
